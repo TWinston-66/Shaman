@@ -17,6 +17,7 @@ struct FileBubble: View {
     @State private var oops = false
     @State private var progress: Double = 0
     @State private var done: Bool = false
+    @State private var elapsed: Duration?
 
     @State private var digestHovered: Bool = false
     @State private var copyHovered: Bool = false
@@ -53,6 +54,15 @@ struct FileBubble: View {
         }
         return theme.color.bgSurface
     }
+    
+    
+    private var subtitle: String {
+        if file.done {
+            let dur = elapsed!.formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
+            return "\(file.subtitle) · \(dur)"
+        }
+        return file.subtitle
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -85,7 +95,7 @@ struct FileBubble: View {
                     .disabled(globalMode.run)
                 }
 
-                Text(file.subtitle)
+                Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(theme.color.textMuted)
                     .lineLimit(1)
@@ -156,13 +166,15 @@ struct FileBubble: View {
                                     }
                                 }
                                 .background {
-                                    RoundedRectangle(cornerRadius: Self.cornerRadius)
-                                        .foregroundStyle(
-                                            copyHovered
-                                                ? theme.color.bgSurface
-                                                : .clear
-                                                    .opacity(0.375)
-                                        )
+                                    RoundedRectangle(
+                                        cornerRadius: Self.cornerRadius
+                                    )
+                                    .foregroundStyle(
+                                        copyHovered
+                                            ? theme.color.bgSurface
+                                            : .clear
+                                                .opacity(0.375)
+                                    )
 
                                 }
                                 .onTapGesture {
@@ -213,13 +225,16 @@ struct FileBubble: View {
         }
         .contentShape(.rect(cornerRadius: Self.cornerRadius))
         .onHover { hovering in
-            withAnimation() {
+            withAnimation {
                 digestHovered = hovering
             }
         }
         .task(id: globalMode) {
             guard globalMode.run else { return }
             progress = 0
+            elapsed = nil
+            let clock = ContinuousClock()
+            let start = clock.now
             do {
                 let d = try await FileHasher(
                     file: file,
@@ -227,6 +242,7 @@ struct FileBubble: View {
                 ).hash {
                     progress = $0
                 }
+                elapsed = clock.now - start
                 digest = d.hex
                 done = true
                 file.done = true
