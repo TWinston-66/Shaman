@@ -23,10 +23,11 @@ struct FileBubble: View {
     @State private var copied: Bool = false
 
     let file: DroppedFile
-    @Binding var hashRequest: HashRequest
+    @State private var hashRequest: HashRequest = HashRequest(compareHex: "", mode: .generate)
+    @Binding var globalMode: ModeState
 
     private var bgColor: Color {
-        if !hashRequest.run {
+        if !globalMode.run {
             return theme.color.bgBase
         } else {
             if oops {
@@ -38,8 +39,13 @@ struct FileBubble: View {
         return theme.color.bgBase
     }
 
+    private var matches: Bool {
+        hashRequest.compareHex.trimmingCharacters(in: .whitespacesAndNewlines)
+            .caseInsensitiveCompare(digest) == .orderedSame
+    }
+
     private var borderColor: Color {
-        if hashRequest.run {
+        if globalMode.run {
             if oops {
                 return theme.color.errorBorder
             } else if done {
@@ -56,15 +62,39 @@ struct FileBubble: View {
                     forFile: file.path.path(percentEncoded: false)
                 )
             )
-            .resizable()
-            .interpolation(.high)
+            //.resizable()
+            //.interpolation(.high)
             .frame(width: 28, height: 28)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(file.name)
-                    .font(.body.weight(.medium))
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+            VStack(alignment: .leading, spacing: 5) {
+
+                HStack {
+                    Text(file.name)
+                        .font(.body.weight(.medium))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+
+                    Spacer()
+
+                    Picker("", selection: $hashRequest.mode) {
+                        ForEach(Mode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                                .font(.caption)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .tint(theme.color.textMuted)
+                    .scaleEffect(0.8)
+                    .disabled(globalMode.run)
+                    .onChange(of: hashRequest.mode) {
+                        if hashRequest.mode == .check {
+                            
+                                globalMode.mode = .check
+                            
+                            
+                        }
+                    }
+                }
 
                 Text(file.subtitle)
                     .font(.caption)
@@ -72,56 +102,113 @@ struct FileBubble: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
 
+                if (hashRequest.mode == .check) && (!globalMode.run) {
+                    TextField(
+                        "",
+                        text: $hashRequest.compareHex,
+                        prompt: Text("hash")
+                    )
+                }
+
                 if progress > 0 && progress < 1 {
                     ProgressView(value: progress)
                         .progressViewStyle(.linear)
                         .controlSize(.small)
                         .tint(theme.color.running)
                 } else if progress == 1 && digest != "" {
+
                     HStack {
-                        Text(digest)
-                            .font(.body)
-                            .foregroundStyle(theme.color.textMuted)
-                            .lineLimit(1)
-                            .padding(.top, 3)
+                        VStack(alignment: .leading, spacing: 5) {
 
-                        if digestHovered {
-                            Image(
-                                systemName: copied
-                                    ? "checkmark" : "document.on.document"
-                            )
-                            .padding(5)
-                            .imageScale(.medium)
-                            .foregroundStyle(theme.color.textMuted)
-                            .transition(.scale.combined(with: .opacity))
-                            .onHover { hovering in
-                                withAnimation {
-                                    if !hovering {
-                                        copied = false
+                            if hashRequest.mode == .check {
+                                var compareText: String {
+                                    if hashRequest.mode == .check {
+                                        return "Expected: "
+                                            + hashRequest.compareHex
                                     }
-                                    copyHovered = hovering
+                                    return hashRequest.compareHex
                                 }
-                            }
-                            .background {
-                                RoundedRectangle(cornerRadius: cornerRadius)
-                                    .foregroundStyle(
-                                        copyHovered
-                                            ? theme.color.bgSurface
-                                            : .clear
-                                                .opacity(0.375)
-                                    )
 
+                                Text(compareText)
+                                    .font(.body.monospaced())
+                                    .foregroundStyle(theme.color.textMuted)
+                                    .lineLimit(1)
+                                    .fixedSize()
                             }
-                            .onTapGesture {
-                                let pasteboard = NSPasteboard.general
-                                pasteboard.clearContents()
-                                pasteboard.setString(digest, forType: .string)
-                                withAnimation {
-                                    copied = true
+
+                            HStack {
+
+                                var gotText: String {
+                                    if hashRequest.mode == .check {
+                                        return "Got: " + digest
+                                    }
+                                    return digest
                                 }
+
+                                Text(gotText)
+                                    .font(.body.monospaced())
+                                    .foregroundStyle(theme.color.textMuted)
+                                    .lineLimit(1)
+                                    .fixedSize()
+
+                                Image(
+                                    systemName: copied
+                                        ? "checkmark" : "document.on.document"
+                                )
+                                .padding(5)
+                                .imageScale(.small)
+                                .foregroundStyle(theme.color.textMuted)
+                                .onHover { hovering in
+                                    withAnimation {
+                                        if !hovering {
+                                            copied = false
+                                        }
+                                        copyHovered = hovering
+                                    }
+                                }
+                                .background {
+                                    RoundedRectangle(cornerRadius: cornerRadius)
+                                        .foregroundStyle(
+                                            copyHovered
+                                                ? theme.color.bgSurface
+                                                : .clear
+                                                    .opacity(0.375)
+                                        )
+
+                                }
+                                .onTapGesture {
+                                    let pasteboard = NSPasteboard.general
+                                    pasteboard.clearContents()
+                                    pasteboard.setString(
+                                        digest,
+                                        forType: .string
+                                    )
+                                    withAnimation {
+                                        copied = true
+                                    }
+                                }
+                                .opacity(digestHovered ? 1 : 0)
+                                .allowsHitTesting(digestHovered)
                             }
+
                         }
+
+                        if hashRequest.mode == .check {
+                            Image(
+                                systemName: matches
+                                    ? "checkmark.shield" : "xmark.shield"
+                            )
+                            .font(.system(size: 24, weight: .semibold))
+                            .padding(10)
+                            .foregroundStyle(
+                                matches
+                                    ? theme.color.doneStrong
+                                    : theme.color.errorStrong
+                            )
+                        }
+
                     }
+                    .padding(.top, 3)
 
                 }
             }
@@ -129,7 +216,7 @@ struct FileBubble: View {
             Spacer(minLength: 0)
         }
         .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(alignment: .leading)
         .background(bgColor, in: .rect(cornerRadius: cornerRadius))
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius)
@@ -137,17 +224,17 @@ struct FileBubble: View {
         }
         .contentShape(.rect(cornerRadius: cornerRadius))
         .onHover { hovering in
-            withAnimation(.interpolatingSpring) {
+            withAnimation() {
                 digestHovered = hovering
             }
         }
-        .task(id: hashRequest) {
-            guard hashRequest.run else { return }
+        .task(id: globalMode) {
+            guard globalMode.run else { return }
             progress = 0
             do {
                 let d = try await FileHasher(
                     file: file,
-                    algorithm: hashRequest.algorithm
+                    algorithm: globalMode.algorithm
                 ).hash {
                     progress = $0
                 }

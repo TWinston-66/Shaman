@@ -17,7 +17,6 @@ struct HeaderView: View {
             Text("Shaman")
                 .font(.system(.title2, design: .rounded).weight(.semibold))
                 .foregroundStyle(theme.color.textPrimary)
-                //.padding(.leading, 20)
 
             Text(version)
                 .font(.caption2.weight(.medium).monospacedDigit())

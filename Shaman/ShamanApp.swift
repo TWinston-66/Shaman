@@ -24,10 +24,8 @@ extension EnvironmentValues {
                 HeaderView(version: "v0.1.0")
 
                 DropZoneView(files: $files)
-                    .frame(minWidth: 500, maxWidth: .infinity)
-                    .frame(height: 400)
-
             }
+            .frame(minHeight: 415)
             .environment(\.theme, .default)
 
         }

@@ -22,6 +22,8 @@ struct Colors: Sendable {
     let doneBorder: Color
     let error: Color
     let errorBorder: Color
+    let doneStrong: Color
+    let errorStrong: Color
 }
 
 extension Theme {
@@ -37,7 +39,9 @@ extension Theme {
             done:        .mint.opacity(0.14),
             doneBorder:  .mint.opacity(0.55),
             error:       .red.opacity(0.14),
-            errorBorder: .red.opacity(0.5)
+            errorBorder: .red.opacity(0.5),
+            doneStrong:  .mint,
+            errorStrong: .red
         )
     )
 }

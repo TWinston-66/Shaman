@@ -12,25 +12,32 @@ struct DropZoneView: View {
     @Environment(\.theme) private var theme
 
     @State private var isTargeted = false
-    @State private var hashRequest = HashRequest(
-        run: false,
-        algorithm: .default
-    )
-
+    @State private var globalMode = ModeState(run: false, mode: .generate, hasEmptyCheck: false, algorithm: .default)
+   
     @Binding var files: [DroppedFile]
 
     private var hashLabel: String {
         return "Hash (\(files.count))"
     }
+    
+    private var hashButtonDisabled: Bool {
+        switch globalMode.mode {
+        case .check:
+            return globalMode.hasEmptyCheck
+        case .generate:
+            return false
+        }
+    }
+    
 
     var body: some View {
 
         ZStack {
 
-            FileListView(files: $files, hashRequest: $hashRequest)
-                .padding(hashRequest.run ? 5 : 16)
+            FileListView(files: $files, globalMode: $globalMode)
+                .padding(globalMode.run ? 5 : 16)
 
-            if !files.isEmpty && !hashRequest.run {
+            if !files.isEmpty && !globalMode.run {
                 VStack {
                     Spacer()
 
@@ -38,7 +45,7 @@ struct DropZoneView: View {
                         Button(
                             action: {
                                 withAnimation {
-                                    hashRequest.run = true
+                                    globalMode.run = true
                                 }
                             },
                             label: {
@@ -49,11 +56,12 @@ struct DropZoneView: View {
                         )
                         .buttonStyle(.glass)
                         .tint(theme.color.bgSurface)
+                        .disabled(hashButtonDisabled)
 
                         Menu {
                             ForEach(HashAlgorithm.allCases) { algo in
                                 Button {
-                                    hashRequest.algorithm = algo
+                                    globalMode.algorithm = algo
                                 } label: {
                                     if algo.isInsecure {
                                         Text(
@@ -65,7 +73,7 @@ struct DropZoneView: View {
                                 }
                             }
                         } label: {
-                            Text(hashRequest.algorithm.displayName)
+                            Text(globalMode.algorithm.displayName)
                                 .font(.body.weight(.medium))
                                 .foregroundStyle(theme.color.textPrimary)
                         }
@@ -76,7 +84,7 @@ struct DropZoneView: View {
                 }
             }
 
-            if !hashRequest.run {
+            if !globalMode.run {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
                     .foregroundStyle(
@@ -87,7 +95,7 @@ struct DropZoneView: View {
 
         }
         .dropDestination(for: URL.self) { urls, _ in
-            if !hashRequest.run {
+            if !globalMode.run {
                 let fileURLs = urls.filter(\.isFileURL)
                 guard !fileURLs.isEmpty else { return false }
                 var accepted = false
