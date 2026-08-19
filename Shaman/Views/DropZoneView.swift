@@ -12,8 +12,8 @@ struct DropZoneView: View {
     @Environment(\.theme) private var theme
 
     @State private var isTargeted = false
-    @State private var globalMode = ModeState(run: false, mode: .generate, hasEmptyCheck: true, algorithm: .default)
-   
+    @State private var globalMode = ModeState(run: false, algorithm: .default)
+
     @Binding var files: [DroppedFile]
 
     private var hashLabel: String {
@@ -21,12 +21,7 @@ struct DropZoneView: View {
     }
     
     private var hashButtonDisabled: Bool {
-        switch globalMode.mode {
-        case .check:
-            return globalMode.hasEmptyCheck
-        case .generate:
-            return false
-        }
+        files.contains { $0.request.isBlankCheck }
     }
 
     private var allFilesDone: Bool {
@@ -49,8 +44,6 @@ struct DropZoneView: View {
                         Button(action: {
                             withAnimation {
                                 globalMode.algorithm = .default
-                                globalMode.hasEmptyCheck = true
-                                globalMode.mode = .generate
                                 globalMode.run = false
                                 files = []
                             }

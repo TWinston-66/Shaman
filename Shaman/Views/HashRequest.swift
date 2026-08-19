@@ -5,6 +5,8 @@
 //  Created by winston on 8/19/26.
 //
 
+import Foundation
+
 enum Mode: String, CaseIterable {
     case check = "Check"
     case generate = "Generate"
@@ -13,11 +15,13 @@ enum Mode: String, CaseIterable {
 struct HashRequest: Equatable {
     var compareHex: String
     var mode: Mode
+
+    var isBlankCheck: Bool {
+        mode == .check && compareHex.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
 struct ModeState: Equatable {
     var run: Bool
-    var mode: Mode
-    var hasEmptyCheck: Bool
     var algorithm: HashAlgorithm
 }

@@ -15,6 +15,7 @@ struct DroppedFile: Identifiable {
     let type: UTType?
     let size: Int64
     var done: Bool
+    var request = HashRequest(compareHex: "", mode: .generate)
 
     var directory: String {
         let path = path.deletingLastPathComponent().path(percentEncoded: false)

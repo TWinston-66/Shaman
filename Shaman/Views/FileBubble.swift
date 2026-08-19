@@ -23,7 +23,6 @@ struct FileBubble: View {
     @State private var copied: Bool = false
 
     @Binding var file: DroppedFile
-    @State private var hashRequest: HashRequest = HashRequest(compareHex: "", mode: .generate)
     @Binding var globalMode: ModeState
 
     private var bgColor: Color {
@@ -40,7 +39,7 @@ struct FileBubble: View {
     }
 
     private var matches: Bool {
-        hashRequest.compareHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        file.request.compareHex.trimmingCharacters(in: .whitespacesAndNewlines)
             .caseInsensitiveCompare(digest) == .orderedSame
     }
 
@@ -74,7 +73,7 @@ struct FileBubble: View {
 
                     Spacer()
 
-                    Picker("", selection: $hashRequest.mode) {
+                    Picker("", selection: $file.request.mode) {
                         ForEach(Mode.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                                 .font(.caption)
@@ -84,14 +83,6 @@ struct FileBubble: View {
                     .tint(theme.color.textMuted)
                     .scaleEffect(0.8)
                     .disabled(globalMode.run)
-                    .onChange(of: hashRequest.mode) {
-                        if hashRequest.mode == .check {
-                            
-                                globalMode.mode = .check
-                            
-                            
-                        }
-                    }
                 }
 
                 Text(file.subtitle)
@@ -100,10 +91,10 @@ struct FileBubble: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
 
-                if (hashRequest.mode == .check) && (!globalMode.run) {
+                if (file.request.mode == .check) && (!globalMode.run) {
                     TextField(
                         "",
-                        text: $hashRequest.compareHex,
+                        text: $file.request.compareHex,
                         prompt: Text("hash")
                     )
                 }
@@ -118,13 +109,13 @@ struct FileBubble: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
 
-                            if hashRequest.mode == .check {
+                            if file.request.mode == .check {
                                 var compareText: String {
-                                    if hashRequest.mode == .check {
+                                    if file.request.mode == .check {
                                         return "Expected: "
-                                            + hashRequest.compareHex
+                                            + file.request.compareHex
                                     }
-                                    return hashRequest.compareHex
+                                    return file.request.compareHex
                                 }
 
                                 Text(compareText)
@@ -137,7 +128,7 @@ struct FileBubble: View {
                             HStack {
 
                                 var gotText: String {
-                                    if hashRequest.mode == .check {
+                                    if file.request.mode == .check {
                                         return "Got: " + digest
                                     }
                                     return digest
@@ -191,7 +182,7 @@ struct FileBubble: View {
 
                         }
 
-                        if hashRequest.mode == .check {
+                        if file.request.mode == .check {
                             Image(
                                 systemName: matches
                                     ? "checkmark.shield" : "xmark.shield"
