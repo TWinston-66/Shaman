@@ -62,6 +62,6 @@ jobs:
           \`\`\`
           NOTES
           gh release create "$TAG" "$zip" \
-            --title "Shaman $TAG" \
+            --title "$TAG" \
             --notes-file "$RUNNER_TEMP/notes.md" \
             --generate-notes
