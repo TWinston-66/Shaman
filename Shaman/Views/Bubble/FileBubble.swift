@@ -123,7 +123,6 @@ struct FileBubble: View {
                     }
                     .transition(.opacity.combined(with: .move(edge: .top)))
 
-              
                 }
 
                 if progress > 0 && progress < 1 {
