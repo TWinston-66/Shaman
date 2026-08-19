@@ -6,8 +6,8 @@
 
 <p align="center">
   <a href="https://github.com/TWinston-66/Shaman/releases/latest"><img src="https://img.shields.io/github/v/release/TWinston-66/Shaman?sort=semver" alt="Release"></a>
-  <a href="https://swift.org"><img src="...Swift-6.0..." alt="Swift"></a>
-  <a href="https://www.apple.com/macos/"><img src="...macOS-26.0%2B..." alt="Platform"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Swift-6.0-F54A2A?logo=swift&logoColor=white" alt="Swift"></a>
+  <a href="#"><img src="https://img.shields.io/badge/macOS-26.0%2B-black?logo=apple" alt="Platform"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"></a>
 </p>
 
