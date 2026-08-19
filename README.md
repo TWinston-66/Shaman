@@ -14,9 +14,21 @@
 Drag-and-drop based checksum tool for Apple Silicon Macs. Verify a file against an
 expected digest, or generate one.
 
-Drop files onto the window, pick an algorithm, and hit **Hash**. Switch any file to
-check mode and paste the digest you expect. Shaman computes each file's digest concurrently and
-tells you whether the two match. 
+Drop files onto the window and hit **Hash**. Every file has its own algorithm and 
+mode, so one batch can mix generations and checks with different algorithms. Hashes
+are generated concurrently, then each file's digest and elapsed time are reported 
+as they land.
+
+The algorithms of pasted digests are inferred based on hash length. Pick a different 
+one from the menu to override. Results show expected against got, with a symbol 
+displaying match success.
+
+## Details
+
+- **Timing** Each files times its own hash in seconds and milliseconds
+- **Insecure algorithms** are marked with a warning symbol in the algorithm dropdown
+- **Duplicate drops are ignored** Files are matched on path, duplicates are ignored
+- **Rows are colored by outcome** — green when the digest lands, red on error
 
 ## Supported algorithms
 
@@ -60,6 +72,11 @@ The project has `DEVELOPMENT_TEAM` set to the maintainer's Apple team, so signin
 fail for anyone else. Set your own team in **Signing & Capabilities**, or build ad-hoc
 signed the way CI does:
 
+```sh
+xcodebuild build -project Shaman.xcodeproj -scheme Shaman -configuration Release \
+  CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=""
+```
+
 ## Requirements
 
 - macOS 26.0 or later
@@ -69,8 +86,8 @@ signed the way CI does:
 
 Files are read in 1 MiB chunks through `FileHandle` and streamed into
 [CryptoKit](https://developer.apple.com/documentation/cryptokit), so memory use stays
-flat regardless of file size. Hashing runs off the main actor with progress reported 
-back per percentage point, and each file's task is cancellable.
+flat regardless of file size. Hashing runs off the main actor with progress reported
+back per percentage point, and each file's task is cancelled if its row goes away.
 
 The app is sandboxed and holds only the `user-selected.read-only` entitlement: it can
 read the files you drop on it and nothing else. There is no network access.
