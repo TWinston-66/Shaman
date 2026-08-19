@@ -1,0 +1,67 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build and release (e.g. v1.0.0)"
+        required: true
+permissions:
+  contents: write
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+jobs:
+  release:
+    name: Build and publish
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Shaman.xcodeproj \
+            -scheme Shaman \
+            -configuration Release \
+            -destination 'platform=macOS,arch=arm64' \
+            -archivePath "$RUNNER_TEMP/Shaman.xcarchive" \
+            MARKETING_VERSION="${TAG#v}" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            | xcbeautify --renderer github-actions
+
+      - name: Package and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/Shaman.xcarchive/Products/Applications/Shaman.app"
+          zip="$RUNNER_TEMP/Shaman-$TAG-macOS-arm64.zip"
+          codesign --verify --strict "$app"
+          # ditto preserves the bundle's symlinks and code signature; `zip` does not.
+          ditto -c -k --keepParent "$app" "$zip"
+          cat > "$RUNNER_TEMP/notes.md" <<NOTES
+          ## Install
+          1. Download \`$(basename "$zip")\` below and unzip it.
+          2. Move **Shaman.app** to \`/Applications\`.
+          3. The build is ad-hoc signed, not notarized, so Gatekeeper will block the
+             first launch. Clear the quarantine flag:
+             \`\`\`sh
+             xattr -dr com.apple.quarantine /Applications/Shaman.app
+             \`\`\`
+          Requires macOS 26.0 or later on Apple Silicon.
+          ## Checksum
+          \`\`\`
+          $(shasum -a 256 "$zip" | cut -d' ' -f1)
+          \`\`\`
+          NOTES
+          gh release create "$TAG" "$zip" \
+            --title "Shaman $TAG" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --generate-notes

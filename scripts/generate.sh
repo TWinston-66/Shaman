@@ -8,7 +8,7 @@ for s in 1M 100M 1G 5G 10G 20G; do
     *G) bytes=$(( n * 1024 * 1024 * 1024 )) ;;
   esac
 
-  echo "writing $test-$s.bin"
+  echo "writing test-$s.bin"
   openssl enc -aes-256-ctr -pass "pass:testdata-$s" -nosalt < /dev/zero 2>/dev/null \
     | head -c "$bytes" > "test-$s.bin" || true
 done

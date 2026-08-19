@@ -21,7 +21,7 @@ extension EnvironmentValues {
 
             VStack(alignment: .leading, spacing: 0) {
 
-                HeaderView(version: "v0.1.0")
+                HeaderView()
 
                 DropZoneView(files: $files)
             }

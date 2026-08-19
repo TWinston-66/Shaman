@@ -10,7 +10,14 @@ import SwiftUI
 struct HeaderView: View {
     @Environment(\.theme) private var theme
 
-    let version: String
+    static var bundleVersion: String {
+        let short =
+            Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
+            as? String
+        return "v" + (short ?? "0.0.0")
+    }
+
+    var version: String = bundleVersion
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
