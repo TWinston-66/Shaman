@@ -14,6 +14,7 @@ struct DroppedFile: Identifiable {
     let path: URL
     let type: UTType?
     let size: Int64
+    var done: Bool
 
     var directory: String {
         let path = path.deletingLastPathComponent().path(percentEncoded: false)

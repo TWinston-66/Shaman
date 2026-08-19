@@ -12,7 +12,7 @@ struct DropZoneView: View {
     @Environment(\.theme) private var theme
 
     @State private var isTargeted = false
-    @State private var globalMode = ModeState(run: false, mode: .generate, hasEmptyCheck: false, algorithm: .default)
+    @State private var globalMode = ModeState(run: false, mode: .generate, hasEmptyCheck: true, algorithm: .default)
    
     @Binding var files: [DroppedFile]
 
@@ -28,6 +28,10 @@ struct DropZoneView: View {
             return false
         }
     }
+
+    private var allFilesDone: Bool {
+        !files.isEmpty && files.allSatisfy(\.done)
+    }
     
 
     var body: some View {
@@ -37,49 +41,71 @@ struct DropZoneView: View {
             FileListView(files: $files, globalMode: $globalMode)
                 .padding(globalMode.run ? 5 : 16)
 
-            if !files.isEmpty && !globalMode.run {
+            if !files.isEmpty && (!globalMode.run || allFilesDone) {
                 VStack {
                     Spacer()
 
-                    HStack(spacing: 5) {
-                        Button(
-                            action: {
-                                withAnimation {
-                                    globalMode.run = true
+                    if allFilesDone {
+                        Button(action: {
+                            withAnimation {
+                                globalMode.algorithm = .default
+                                globalMode.hasEmptyCheck = true
+                                globalMode.mode = .generate
+                                globalMode.run = false
+                                files = []
+                            }
+                        }, label: {
+                            Text("Start Over")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(theme.color.textPrimary)
+                        })
+                        .buttonStyle(.glass)
+                        .tint(theme.color.bgSurface)
+                        .padding(20)
+                    }
+
+                    if !globalMode.run {
+                        HStack(spacing: 5) {
+
+                            Button(
+                                action: {
+                                    withAnimation {
+                                        globalMode.run = true
+                                    }
+                                },
+                                label: {
+                                    Text(hashLabel)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(theme.color.textPrimary)
                                 }
-                            },
-                            label: {
-                                Text(hashLabel)
+                            )
+                            .buttonStyle(.glass)
+                            .tint(theme.color.bgSurface)
+                            .disabled(hashButtonDisabled)
+
+                            Menu {
+                                ForEach(HashAlgorithm.allCases) { algo in
+                                    Button {
+                                        globalMode.algorithm = algo
+                                    } label: {
+                                        if algo.isInsecure {
+                                            Text(
+                                                "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
+                                            )
+                                        } else {
+                                            Text(algo.displayName)
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Text(globalMode.algorithm.displayName)
                                     .font(.body.weight(.medium))
                                     .foregroundStyle(theme.color.textPrimary)
                             }
-                        )
-                        .buttonStyle(.glass)
-                        .tint(theme.color.bgSurface)
-                        .disabled(hashButtonDisabled)
-
-                        Menu {
-                            ForEach(HashAlgorithm.allCases) { algo in
-                                Button {
-                                    globalMode.algorithm = algo
-                                } label: {
-                                    if algo.isInsecure {
-                                        Text(
-                                            "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
-                                        )
-                                    } else {
-                                        Text(algo.displayName)
-                                    }
-                                }
-                            }
-                        } label: {
-                            Text(globalMode.algorithm.displayName)
-                                .font(.body.weight(.medium))
-                                .foregroundStyle(theme.color.textPrimary)
+                            .tint(theme.color.primary)
                         }
-                        .tint(theme.color.primary)
+                        .padding(20)
                     }
-                    .padding(20)
 
                 }
             }
@@ -133,7 +159,8 @@ struct DropZoneView: View {
             name: rv?.name ?? url.lastPathComponent,
             path: url,
             type: rv?.contentType,
-            size: Int64(rv?.fileSize ?? 0)
+            size: Int64(rv?.fileSize ?? 0),
+            done: false
         )
 
     }

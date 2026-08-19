@@ -22,7 +22,7 @@ struct FileBubble: View {
     @State private var copyHovered: Bool = false
     @State private var copied: Bool = false
 
-    let file: DroppedFile
+    @Binding var file: DroppedFile
     @State private var hashRequest: HashRequest = HashRequest(compareHex: "", mode: .generate)
     @Binding var globalMode: ModeState
 
@@ -62,8 +62,6 @@ struct FileBubble: View {
                     forFile: file.path.path(percentEncoded: false)
                 )
             )
-            //.resizable()
-            //.interpolation(.high)
             .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 5) {
@@ -240,9 +238,11 @@ struct FileBubble: View {
                 }
                 digest = d.hex
                 done = true
+                file.done = true
             } catch is CancellationError {
             } catch {
                 oops = true
+                file.done = true
             }
         }
     }

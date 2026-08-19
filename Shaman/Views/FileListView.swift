@@ -20,8 +20,8 @@ struct FileListView: View {
             }
         } else {
             ScrollView {
-                ForEach(files) { file in
-                    FileBubble(file: file, globalMode: $globalMode)
+                ForEach($files) { $file in
+                    FileBubble(file: $file, globalMode: $globalMode)
                 }
 
             }
