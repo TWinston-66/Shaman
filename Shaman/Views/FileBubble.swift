@@ -23,11 +23,14 @@ struct FileBubble: View {
     @State private var copyHovered: Bool = false
     @State private var copied: Bool = false
 
+    @State private var algorithm: HashAlgorithm = .default
+    @State private var autoAlgo: Bool = false
+
     @Binding var file: DroppedFile
-    @Binding var globalMode: ModeState
+    @Binding var run: Bool
 
     private var bgColor: Color {
-        if !globalMode.run {
+        if !run {
             return theme.color.bgBase
         } else {
             if oops {
@@ -45,7 +48,7 @@ struct FileBubble: View {
     }
 
     private var borderColor: Color {
-        if globalMode.run {
+        if run {
             if oops {
                 return theme.color.errorBorder
             } else if done {
@@ -54,11 +57,12 @@ struct FileBubble: View {
         }
         return theme.color.bgSurface
     }
-    
-    
+
     private var subtitle: String {
         if file.done {
-            let dur = elapsed!.formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
+            let dur = elapsed!.formatted(
+                .units(allowed: [.seconds, .milliseconds], width: .narrow)
+            )
             return "\(file.subtitle) · \(dur)"
         }
         return file.subtitle
@@ -75,25 +79,10 @@ struct FileBubble: View {
 
             VStack(alignment: .leading, spacing: 5) {
 
-                HStack {
-                    Text(file.name)
-                        .font(.body.weight(.medium))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-
-                    Spacer()
-
-                    Picker("", selection: $file.request.mode) {
-                        ForEach(Mode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
-                                .font(.caption)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .tint(theme.color.textMuted)
-                    .scaleEffect(0.8)
-                    .disabled(globalMode.run)
-                }
+                Text(file.name)
+                    .font(.body.weight(.medium))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
 
                 Text(subtitle)
                     .font(.caption)
@@ -101,12 +90,40 @@ struct FileBubble: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
 
-                if (file.request.mode == .check) && (!globalMode.run) {
+                if (file.request.mode == .check) && (!run) {
                     TextField(
                         "",
                         text: $file.request.compareHex,
-                        prompt: Text("hash")
+                        prompt: Text("expected hash")
                     )
+                    .onChange(of: file.request.compareHex) {
+                        var normalizedHex: String {
+                            (file.request.compareHex.split(
+                                whereSeparator: \.isWhitespace
+                            ).first?
+                            .split(separator: ":").last).map(String.init)?
+                            .lowercased() ?? ""
+                        }
+
+                        var inferredAlgorithm: HashAlgorithm? {
+                            guard normalizedHex.allSatisfy(\.isHexDigit) else {
+                                return nil
+                            }
+                            return HashAlgorithm(
+                                hexDigestLength: normalizedHex.count
+                            )
+                        }
+                        guard inferredAlgorithm != nil else { return }
+
+                        withAnimation {
+                            algorithm = inferredAlgorithm!
+                            autoAlgo = true
+                        }
+
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+
+              
                 }
 
                 if progress > 0 && progress < 1 {
@@ -206,6 +223,8 @@ struct FileBubble: View {
                                     ? theme.color.doneStrong
                                     : theme.color.errorStrong
                             )
+                            .contentTransition(.symbolEffect(.replace))
+                            .opacity(file.request.mode == .check ? 1 : 0)
                         }
 
                     }
@@ -214,7 +233,56 @@ struct FileBubble: View {
                 }
             }
 
-            Spacer(minLength: 0)
+            Spacer()
+
+            VStack(spacing: 5) {
+
+                Picker("", selection: $file.request.mode) {
+                    ForEach(Mode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                            .font(.caption)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .tint(theme.color.textMuted)
+                .scaleEffect(0.8)
+                .disabled(run)
+
+                HStack(spacing: 5) {
+                    Menu {
+                        ForEach(HashAlgorithm.allCases) { algo in
+                            Button {
+                                withAnimation {
+                                    algorithm = algo
+                                    autoAlgo = false
+                                }
+
+                            } label: {
+                                if algo.isInsecure {
+                                    Text(
+                                        "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
+                                    )
+                                } else {
+                                    Text(algo.displayName)
+                                }
+                            }
+                        }
+                    } label: {
+                        Text(algorithm.displayName)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(theme.color.textPrimary)
+                    }
+                    .tint(theme.color.primary)
+
+                    if autoAlgo {
+                        Text("(auto)")
+                            .font(Font.callout.monospacedDigit())
+                    }
+                }
+
+            }
+
+            //Spacer(minLength: 0)
         }
         .padding(10)
         .frame(alignment: .leading)
@@ -229,8 +297,9 @@ struct FileBubble: View {
                 digestHovered = hovering
             }
         }
-        .task(id: globalMode) {
-            guard globalMode.run else { return }
+        .animation(.default, value: file.request.mode)
+        .task(id: run) {
+            guard run else { return }
             progress = 0
             elapsed = nil
             let clock = ContinuousClock()
@@ -238,7 +307,7 @@ struct FileBubble: View {
             do {
                 let d = try await FileHasher(
                     file: file,
-                    algorithm: globalMode.algorithm
+                    algorithm: algorithm
                 ).hash {
                     progress = $0
                 }

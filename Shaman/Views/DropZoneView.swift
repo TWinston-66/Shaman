@@ -12,7 +12,7 @@ struct DropZoneView: View {
     @Environment(\.theme) private var theme
 
     @State private var isTargeted = false
-    @State private var globalMode = ModeState(run: false, algorithm: .default)
+    @State private var run = false
 
     @Binding var files: [DroppedFile]
 
@@ -33,18 +33,17 @@ struct DropZoneView: View {
 
         ZStack {
 
-            FileListView(files: $files, globalMode: $globalMode)
-                .padding(globalMode.run ? 5 : 16)
+            FileListView(files: $files, run: $run)
+                .padding(run ? 5 : 16)
 
-            if !files.isEmpty && (!globalMode.run || allFilesDone) {
+            if !files.isEmpty && (!run || allFilesDone) {
                 VStack {
                     Spacer()
 
                     if allFilesDone {
                         Button(action: {
                             withAnimation {
-                                globalMode.algorithm = .default
-                                globalMode.run = false
+                                run = false
                                 files = []
                             }
                         }, label: {
@@ -57,13 +56,13 @@ struct DropZoneView: View {
                         .padding(20)
                     }
 
-                    if !globalMode.run {
+                    if !run {
                         HStack(spacing: 5) {
 
                             Button(
                                 action: {
                                     withAnimation {
-                                        globalMode.run = true
+                                        run = true
                                     }
                                 },
                                 label: {
@@ -76,26 +75,7 @@ struct DropZoneView: View {
                             .tint(theme.color.bgSurface)
                             .disabled(hashButtonDisabled)
 
-                            Menu {
-                                ForEach(HashAlgorithm.allCases) { algo in
-                                    Button {
-                                        globalMode.algorithm = algo
-                                    } label: {
-                                        if algo.isInsecure {
-                                            Text(
-                                                "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
-                                            )
-                                        } else {
-                                            Text(algo.displayName)
-                                        }
-                                    }
-                                }
-                            } label: {
-                                Text(globalMode.algorithm.displayName)
-                                    .font(.body.weight(.medium))
-                                    .foregroundStyle(theme.color.textPrimary)
-                            }
-                            .tint(theme.color.primary)
+                            
                         }
                         .padding(20)
                     }
@@ -103,7 +83,7 @@ struct DropZoneView: View {
                 }
             }
 
-            if !globalMode.run {
+            if !run {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
                     .foregroundStyle(
@@ -114,7 +94,7 @@ struct DropZoneView: View {
 
         }
         .dropDestination(for: URL.self) { urls, _ in
-            if !globalMode.run {
+            if !run {
                 let fileURLs = urls.filter(\.isFileURL)
                 guard !fileURLs.isEmpty else { return false }
                 var accepted = false
