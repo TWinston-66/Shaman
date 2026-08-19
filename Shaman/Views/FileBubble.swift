@@ -11,7 +11,7 @@ import SwiftUI
 
 struct FileBubble: View {
     @Environment(\.theme) private var theme
-    private var cornerRadius: CGFloat = 10
+    private static let cornerRadius: CGFloat = 10
 
     @State private var digest: String = ""
     @State private var oops = false
@@ -165,7 +165,7 @@ struct FileBubble: View {
                                     }
                                 }
                                 .background {
-                                    RoundedRectangle(cornerRadius: cornerRadius)
+                                    RoundedRectangle(cornerRadius: Self.cornerRadius)
                                         .foregroundStyle(
                                             copyHovered
                                                 ? theme.color.bgSurface
@@ -215,12 +215,12 @@ struct FileBubble: View {
         }
         .padding(10)
         .frame(alignment: .leading)
-        .background(bgColor, in: .rect(cornerRadius: cornerRadius))
+        .background(bgColor, in: .rect(cornerRadius: Self.cornerRadius))
         .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius)
+            RoundedRectangle(cornerRadius: Self.cornerRadius)
                 .strokeBorder(borderColor)
         }
-        .contentShape(.rect(cornerRadius: cornerRadius))
+        .contentShape(.rect(cornerRadius: Self.cornerRadius))
         .onHover { hovering in
             withAnimation() {
                 digestHovered = hovering

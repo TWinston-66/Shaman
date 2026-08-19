@@ -12,7 +12,7 @@ struct FileHasher {
 
     let file: DroppedFile
     let algorithm: HashAlgorithm
-    private var chunkSize = 1 << 20
+    private nonisolated static let chunkSize = 1 << 20
 
     @concurrent nonisolated func hash(
         onProgress: @MainActor (Double) -> Void = { _ in }
@@ -25,7 +25,7 @@ struct FileHasher {
         var bytesRead = 0
         var lastStep = -1
 
-        while let chunk = try handle.read(upToCount: chunkSize), !chunk.isEmpty
+        while let chunk = try handle.read(upToCount: Self.chunkSize), !chunk.isEmpty
         {
             try Task.checkCancellation()
             hasher.update(data: chunk)
