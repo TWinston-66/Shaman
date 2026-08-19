@@ -1,17 +1,21 @@
-# Shaman
+<p align="center">
+  <img src="images/Shaman-macOS-Dark-1024@1x.png" alt="Shaman icon" width="128">
+</p>
 
-<p align="center"><img src="images/Shaman-macOS-Dark-1024@1x.png" alt="icon" width="128"></p>
+<h1 align="center">Shaman</h1>
 
-[![Release](https://img.shields.io/github/v/release/TWinston-66/Shaman?sort=semver)](https://github.com/TWinston-66/Shaman/releases/latest)
-[![Swift](https://img.shields.io/badge/Swift-6.0-F54A2A?logo=swift&logoColor=white)](#)
-[![Platform](https://img.shields.io/badge/macOS-26.0%2B-black?logo=apple)](#)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/TWinston-66/Shaman/releases/latest"><img src="https://img.shields.io/github/v/release/TWinston-66/Shaman?sort=semver" alt="Release"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Swift-6.0-F54A2A?logo=swift&logoColor=white" alt="Swift"></a>
+  <a href="#"><img src="https://img.shields.io/badge/macOS-26.0%2B-black?logo=apple" alt="Platform"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"></a>
+</p>
 
 Drag-and-drop based checksum tool for Apple Silicon Macs. Verify a file against an
 expected digest, or generate one.
 
 Drop files onto the window, pick an algorithm, and hit **Hash**. Switch any file to
-check mode and paste the digest you expect. Shaman computes each file's digest convurrently and
+check mode and paste the digest you expect. Shaman computes each file's digest concurrently and
 tells you whether the two match. 
 
 ## Supported algorithms
