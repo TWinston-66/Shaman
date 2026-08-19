@@ -1,5 +1,7 @@
 # Shaman
 
+<p align="center"><img src="images/Shaman-macOS-Dark-1024@1x.png" alt="icon" width="128"></p>
+
 [![Release](https://img.shields.io/github/v/release/TWinston-66/Shaman?sort=semver)](https://github.com/TWinston-66/Shaman/releases/latest)
 [![Swift](https://img.shields.io/badge/Swift-6.0-F54A2A?logo=swift&logoColor=white)](#)
 [![Platform](https://img.shields.io/badge/macOS-26.0%2B-black?logo=apple)](#)

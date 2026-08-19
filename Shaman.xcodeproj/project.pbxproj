@@ -6,8 +6,13 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DC57206130365C2000A51E5C /* Shaman.icon in Resources */ = {isa = PBXBuildFile; fileRef = DC57206030365C2000A51E5C /* Shaman.icon */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Shaman.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shaman.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC57206030365C2000A51E5C /* Shaman.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Shaman.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +36,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* Shaman */,
+				DC57206030365C2000A51E5C /* Shaman.icon */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -102,6 +108,7 @@
 		000000000000000140000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				DC57206130365C2000A51E5C /* Shaman.icon in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -250,6 +257,7 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "Shaman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Shaman;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -291,6 +299,7 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "Shaman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Shaman;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
