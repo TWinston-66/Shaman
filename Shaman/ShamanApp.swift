@@ -12,14 +12,14 @@ extension EnvironmentValues {
     @Entry var theme: Theme = .default
 }
 
-@main struct Shaman: App {
+@main struct ShamanApp: App {
 
     @State private var files: [DroppedFile] = []
 
     var body: some Scene {
         WindowGroup {
 
-            ContentView(files: $files)
+            DropZoneView(files: $files)
                 .frame(minWidth: 500)
                 .fixedSize(horizontal: true, vertical: false)
                 .frame(height: 400)
