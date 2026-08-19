@@ -20,7 +20,9 @@ extension EnvironmentValues {
         WindowGroup {
 
             ContentView(files: $files)
-                .frame(width: 500, height: 400)
+                .frame(minWidth: 500)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(height: 400)
                 .environment(\.theme, .default)
 
         }

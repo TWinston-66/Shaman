@@ -17,6 +17,9 @@ struct Colors: Sendable {
     let textMuted: Color
     let primary: Color
     let border: Color
+    let running: Color
+    let done: Color
+    let error: Color
 }
 
 extension Theme {
@@ -25,9 +28,12 @@ extension Theme {
             bgBase:      .teal.opacity(0.12),
             bgSurface:   .teal.opacity(0.35),
             textPrimary: .white,
-            textMuted:   .secondary,
-            primary:      .teal,
-            border:      .secondary
+            textMuted:   .white.opacity(0.6),
+            primary:     .teal,
+            border:      .teal.opacity(0.5),
+            running:     .orange,
+            done:        .green.opacity(0.5),
+            error:       .red.opacity(0.5)
         )
     )
 }

@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.theme) private var theme
-    
+
     @State private var isTargeted = false
     @State private var run: Bool = false
 
@@ -23,7 +23,7 @@ struct ContentView: View {
             FileList(files: $files, run: $run)
                 .padding(run ? 5 : 16)
 
-            if !files.isEmpty {
+            if !files.isEmpty && !run {
                 VStack {
                     Spacer()
                     Button(
@@ -44,26 +44,31 @@ struct ContentView: View {
 
                 }
             }
-            
+
             if !run {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
-                    .foregroundStyle(isTargeted ? theme.color.primary : theme.color.border)
+                    .foregroundStyle(
+                        isTargeted ? theme.color.primary : theme.color.border
+                    )
                     .padding(5)
             }
-            
 
         }
         .dropDestination(for: URL.self) { urls, _ in
             if !run {
-                guard urls.count == 1, let url = urls.first, url.isFileURL
-                else {
-                    return false
+                let fileURLs = urls.filter(\.isFileURL)
+                guard !fileURLs.isEmpty else { return false }
+                var accepted = false
+                for url in fileURLs {
+                    if updateFiles(url) {
+                        accepted = true
+                    }
                 }
-                return updateFiles(url)
+                return accepted
             }
             return false
-            
+
         } isTargeted: {
             isTargeted = $0
         }
@@ -73,13 +78,13 @@ struct ContentView: View {
     private func updateFiles(_ url: URL) -> Bool {
         let file = open(url)
         guard let f = file else { return false }
-        files.append(f)
+        if !files.contains(where: { $0.path == f.path }) {
+            files.append(f)
+        }
         return true
     }
 
     private func open(_ url: URL) -> DroppedFile? {
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
 
         let rv = try? url.resourceValues(forKeys: [
             .contentTypeKey, .fileSizeKey, .nameKey,
@@ -96,10 +101,10 @@ struct ContentView: View {
 }
 
 struct FileList: View {
-    
+
     @Binding var files: [DroppedFile]
     @Binding var run: Bool
-    
+
     var body: some View {
         if files.isEmpty {
             VStack {
