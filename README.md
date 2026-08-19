@@ -65,7 +65,7 @@ Go to *System Settings → Privacy & Security → Open Anyway* to approve and la
 ### Shaman SHA-256 Checksum
 
 ```
-f6400bce2cc9feb28d3f50092138be8ad73a2e2d17b5ddbe9f70d285735da053
+580fb0b0ca52159974284a977c2763d8bece8f00558a0c2fbad71740a1de4442
 ```
 
 ## Building from source
