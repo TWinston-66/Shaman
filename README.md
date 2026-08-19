@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/Shaman-macOS-Dark-1024@1x.png" alt="Shaman icon" width="128">
+  <img src="images/icon_dark_0-2-0.png" alt="Shaman icon" width="128">
 </p>
 
 <h1 align="center">Shaman</h1>
@@ -19,9 +19,17 @@ mode, so one batch can mix generations and checks with different algorithms. Has
 are generated concurrently, then each file's digest and elapsed time are reported 
 as they land.
 
+<p align="center">
+  <img src="images/file_list_0-2-0.png" alt="Shaman with a file dropped in, an expected digest pasted, and SHA-256 auto-detected" width="700">
+</p>
+
 The algorithms of pasted digests are inferred based on hash length. Pick a different 
 one from the menu to override. Results show expected against got, with a symbol 
 displaying match success.
+
+<p align="center">
+  <img src="images/results_0-2-0.png" alt="Result row showing expected and got digests matching, with elapsed time" width="900">
+</p>
 
 ## Details
 
