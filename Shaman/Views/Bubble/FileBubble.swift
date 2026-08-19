@@ -11,7 +11,7 @@ import SwiftUI
 
 struct FileBubble: View {
     @Environment(\.theme) private var theme
-    private static let cornerRadius: CGFloat = 10
+    private let cornerRadius: CGFloat = 10
 
     @State private var digest: String = ""
     @State private var oops = false
@@ -79,51 +79,7 @@ struct FileBubble: View {
 
             VStack(alignment: .leading, spacing: 5) {
 
-                Text(file.name)
-                    .font(.body.weight(.medium))
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(theme.color.textMuted)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-
-                if (file.request.mode == .check) && (!run) {
-                    TextField(
-                        "",
-                        text: $file.request.compareHex,
-                        prompt: Text("expected hash")
-                    )
-                    .onChange(of: file.request.compareHex) {
-                        var normalizedHex: String {
-                            (file.request.compareHex.split(
-                                whereSeparator: \.isWhitespace
-                            ).first?
-                            .split(separator: ":").last).map(String.init)?
-                            .lowercased() ?? ""
-                        }
-
-                        var inferredAlgorithm: HashAlgorithm? {
-                            guard normalizedHex.allSatisfy(\.isHexDigit) else {
-                                return nil
-                            }
-                            return HashAlgorithm(
-                                hexDigestLength: normalizedHex.count
-                            )
-                        }
-                        guard inferredAlgorithm != nil else { return }
-
-                        withAnimation {
-                            algorithm = inferredAlgorithm!
-                            autoAlgo = true
-                        }
-
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-
-                }
+                BubbleInfo(file: $file, algorithm: $algorithm, run: $run, autoAlgo: $autoAlgo, subtitle: subtitle)
 
                 if progress > 0 && progress < 1 {
                     ProgressView(value: progress)
@@ -132,101 +88,7 @@ struct FileBubble: View {
                         .tint(theme.color.running)
                 } else if progress == 1 && digest != "" {
 
-                    HStack {
-                        VStack(alignment: .leading, spacing: 5) {
-
-                            if file.request.mode == .check {
-                                var compareText: String {
-                                    if file.request.mode == .check {
-                                        return "Expected: "
-                                            + file.request.compareHex
-                                    }
-                                    return file.request.compareHex
-                                }
-
-                                Text(compareText)
-                                    .font(.body.monospaced())
-                                    .foregroundStyle(theme.color.textMuted)
-                                    .lineLimit(1)
-                                    .fixedSize()
-                            }
-
-                            HStack {
-
-                                var gotText: String {
-                                    if file.request.mode == .check {
-                                        return "Got: " + digest
-                                    }
-                                    return digest
-                                }
-
-                                Text(gotText)
-                                    .font(.body.monospaced())
-                                    .foregroundStyle(theme.color.textMuted)
-                                    .lineLimit(1)
-                                    .fixedSize()
-
-                                Image(
-                                    systemName: copied
-                                        ? "checkmark" : "document.on.document"
-                                )
-                                .padding(5)
-                                .imageScale(.small)
-                                .foregroundStyle(theme.color.textMuted)
-                                .onHover { hovering in
-                                    withAnimation {
-                                        if !hovering {
-                                            copied = false
-                                        }
-                                        copyHovered = hovering
-                                    }
-                                }
-                                .background {
-                                    RoundedRectangle(
-                                        cornerRadius: Self.cornerRadius
-                                    )
-                                    .foregroundStyle(
-                                        copyHovered
-                                            ? theme.color.bgSurface
-                                            : .clear
-                                                .opacity(0.375)
-                                    )
-
-                                }
-                                .onTapGesture {
-                                    let pasteboard = NSPasteboard.general
-                                    pasteboard.clearContents()
-                                    pasteboard.setString(
-                                        digest,
-                                        forType: .string
-                                    )
-                                    withAnimation {
-                                        copied = true
-                                    }
-                                }
-                                .opacity(digestHovered ? 1 : 0)
-                                .allowsHitTesting(digestHovered)
-                            }
-
-                        }
-
-                        if file.request.mode == .check {
-                            Image(
-                                systemName: matches
-                                    ? "checkmark.shield" : "xmark.shield"
-                            )
-                            .font(.system(size: 24, weight: .semibold))
-                            .padding(10)
-                            .foregroundStyle(
-                                matches
-                                    ? theme.color.doneStrong
-                                    : theme.color.errorStrong
-                            )
-                            .contentTransition(.symbolEffect(.replace))
-                            .opacity(file.request.mode == .check ? 1 : 0)
-                        }
-
-                    }
+                    BubbleResults(file: $file, algorithm: $algorithm, run: $run, digest: $digest, digestHovered: $digestHovered, copied: $copied, copyHovered: $copyHovered, matches: matches, cornerRadius: cornerRadius)
                     .padding(.top, 3)
 
                 }
@@ -234,63 +96,16 @@ struct FileBubble: View {
 
             Spacer()
 
-            VStack(spacing: 5) {
-
-                Picker("", selection: $file.request.mode) {
-                    ForEach(Mode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
-                            .font(.caption)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .tint(theme.color.textMuted)
-                .scaleEffect(0.8)
-                .disabled(run)
-
-                HStack(spacing: 5) {
-                    Menu {
-                        ForEach(HashAlgorithm.allCases) { algo in
-                            Button {
-                                withAnimation {
-                                    algorithm = algo
-                                    autoAlgo = false
-                                }
-
-                            } label: {
-                                if algo.isInsecure {
-                                    Text(
-                                        "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
-                                    )
-                                } else {
-                                    Text(algo.displayName)
-                                }
-                            }
-                        }
-                    } label: {
-                        Text(algorithm.displayName)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(theme.color.textPrimary)
-                    }
-                    .tint(theme.color.primary)
-
-                    if autoAlgo {
-                        Text("(auto)")
-                            .font(Font.callout.monospacedDigit())
-                    }
-                }
-
-            }
-
-            //Spacer(minLength: 0)
+            BubbleForm(file: $file, algorithm: $algorithm, run: $run, autoAlgo: $autoAlgo)
         }
         .padding(10)
         .frame(alignment: .leading)
-        .background(bgColor, in: .rect(cornerRadius: Self.cornerRadius))
+        .background(bgColor, in: .rect(cornerRadius: cornerRadius))
         .overlay {
-            RoundedRectangle(cornerRadius: Self.cornerRadius)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .strokeBorder(borderColor)
         }
-        .contentShape(.rect(cornerRadius: Self.cornerRadius))
+        .contentShape(.rect(cornerRadius: cornerRadius))
         .onHover { hovering in
             withAnimation {
                 digestHovered = hovering
