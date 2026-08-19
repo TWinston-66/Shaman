@@ -11,16 +11,17 @@ import SwiftUI
 struct FileHasher {
 
     let file: DroppedFile
+    let algorithm: HashAlgorithm
     private var chunkSize = 1 << 20
 
     @concurrent nonisolated func hash(
         onProgress: @MainActor (Double) -> Void = { _ in }
-    ) async throws -> SHA256Digest {
+    ) async throws -> HashDigest {
         let total = Int(file.size)
         let handle = try FileHandle(forReadingFrom: file.path)
         defer { try? handle.close() }
 
-        var hasher = SHA256()
+        var hasher = await algorithm.makeHasher()
         var bytesRead = 0
         var lastStep = -1
 
@@ -38,6 +39,7 @@ struct FileHasher {
             }
         }
         await onProgress(1.0)
-        return hasher.finalize()
+        
+        return HashDigest(algorithm: algorithm, digest: hasher.finalize())
     }
 }

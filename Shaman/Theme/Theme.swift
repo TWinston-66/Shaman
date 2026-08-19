@@ -19,7 +19,9 @@ struct Colors: Sendable {
     let border: Color
     let running: Color
     let done: Color
+    let doneBorder: Color
     let error: Color
+    let errorBorder: Color
 }
 
 extension Theme {
@@ -32,8 +34,10 @@ extension Theme {
             primary:     .teal,
             border:      .teal.opacity(0.5),
             running:     .orange,
-            done:        .green.opacity(0.5),
-            error:       .red.opacity(0.5)
+            done:        .mint.opacity(0.14),
+            doneBorder:  .mint.opacity(0.55),
+            error:       .red.opacity(0.14),
+            errorBorder: .red.opacity(0.5)
         )
     )
 }

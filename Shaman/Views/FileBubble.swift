@@ -23,10 +23,10 @@ struct FileBubble: View {
     @State private var copied: Bool = false
 
     let file: DroppedFile
-    @Binding var run: Bool
+    @Binding var hashRequest: HashRequest
 
     private var bgColor: Color {
-        if !run {
+        if !hashRequest.run {
             return theme.color.bgBase
         } else {
             if oops {
@@ -36,6 +36,17 @@ struct FileBubble: View {
             }
         }
         return theme.color.bgBase
+    }
+
+    private var borderColor: Color {
+        if hashRequest.run {
+            if oops {
+                return theme.color.errorBorder
+            } else if done {
+                return theme.color.doneBorder
+            }
+        }
+        return theme.color.bgSurface
     }
 
     var body: some View {
@@ -95,7 +106,7 @@ struct FileBubble: View {
                                 RoundedRectangle(cornerRadius: cornerRadius)
                                     .foregroundStyle(
                                         copyHovered
-                                            ? theme.color.done
+                                            ? theme.color.bgSurface
                                             : .clear
                                                 .opacity(0.375)
                                     )
@@ -122,7 +133,7 @@ struct FileBubble: View {
         .background(bgColor, in: .rect(cornerRadius: cornerRadius))
         .overlay {
             RoundedRectangle(cornerRadius: cornerRadius)
-                .strokeBorder(theme.color.bgSurface)
+                .strokeBorder(borderColor)
         }
         .contentShape(.rect(cornerRadius: cornerRadius))
         .onHover { hovering in
@@ -130,14 +141,17 @@ struct FileBubble: View {
                 digestHovered = hovering
             }
         }
-        .task(id: run) {
-            guard run else { return }
+        .task(id: hashRequest) {
+            guard hashRequest.run else { return }
             progress = 0
             do {
-                let d = try await FileHasher(file: file).hash {
+                let d = try await FileHasher(
+                    file: file,
+                    algorithm: hashRequest.algorithm
+                ).hash {
                     progress = $0
                 }
-                digest = d.map { String(format: "%02x", $0) }.joined()
+                digest = d.hex
                 done = true
             } catch is CancellationError {
             } catch {

@@ -10,7 +10,7 @@ import SwiftUI
 struct FileListView: View {
 
     @Binding var files: [DroppedFile]
-    @Binding var run: Bool
+    @Binding var hashRequest: HashRequest
 
     var body: some View {
         if files.isEmpty {
@@ -21,7 +21,7 @@ struct FileListView: View {
         } else {
             ScrollView {
                 ForEach(files) { file in
-                    FileBubble(file: file, run: $run)
+                    FileBubble(file: file, hashRequest: $hashRequest)
                 }
 
             }

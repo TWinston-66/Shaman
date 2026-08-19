@@ -12,40 +12,71 @@ struct DropZoneView: View {
     @Environment(\.theme) private var theme
 
     @State private var isTargeted = false
-    @State private var run: Bool = false
+    @State private var hashRequest = HashRequest(
+        run: false,
+        algorithm: .default
+    )
 
     @Binding var files: [DroppedFile]
+
+    private var hashLabel: String {
+        return "Hash (\(files.count))"
+    }
 
     var body: some View {
 
         ZStack {
 
-            FileListView(files: $files, run: $run)
-                .padding(run ? 5 : 16)
+            FileListView(files: $files, hashRequest: $hashRequest)
+                .padding(hashRequest.run ? 5 : 16)
 
-            if !files.isEmpty && !run {
+            if !files.isEmpty && !hashRequest.run {
                 VStack {
                     Spacer()
-                    Button(
-                        action: {
-                            withAnimation {
-                                run = true
+
+                    HStack(spacing: 5) {
+                        Button(
+                            action: {
+                                withAnimation {
+                                    hashRequest.run = true
+                                }
+                            },
+                            label: {
+                                Text(hashLabel)
+                                    .font(.body.weight(.medium))
+                                    .foregroundStyle(theme.color.textPrimary)
                             }
-                        },
-                        label: {
-                            Text("Hash")
+                        )
+                        .buttonStyle(.glass)
+                        .tint(theme.color.bgSurface)
+
+                        Menu {
+                            ForEach(HashAlgorithm.allCases) { algo in
+                                Button {
+                                    hashRequest.algorithm = algo
+                                } label: {
+                                    if algo.isInsecure {
+                                        Text(
+                                            "\(Image(systemName: "exclamationmark.triangle")) \(algo.displayName)"
+                                        )
+                                    } else {
+                                        Text(algo.displayName)
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text(hashRequest.algorithm.displayName)
                                 .font(.body.weight(.medium))
                                 .foregroundStyle(theme.color.textPrimary)
                         }
-                    )
+                        .tint(theme.color.primary)
+                    }
                     .padding(20)
-                    .buttonStyle(.glass)
-                    .tint(theme.color.bgSurface)
 
                 }
             }
 
-            if !run {
+            if !hashRequest.run {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
                     .foregroundStyle(
@@ -56,7 +87,7 @@ struct DropZoneView: View {
 
         }
         .dropDestination(for: URL.self) { urls, _ in
-            if !run {
+            if !hashRequest.run {
                 let fileURLs = urls.filter(\.isFileURL)
                 guard !fileURLs.isEmpty else { return false }
                 var accepted = false

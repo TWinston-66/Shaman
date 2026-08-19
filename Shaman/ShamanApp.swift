@@ -19,11 +19,16 @@ extension EnvironmentValues {
     var body: some Scene {
         WindowGroup {
 
-            DropZoneView(files: $files)
-                .frame(minWidth: 500)
-                .fixedSize(horizontal: true, vertical: false)
-                .frame(height: 400)
-                .environment(\.theme, .default)
+            VStack(alignment: .leading, spacing: 0) {
+
+                HeaderView(version: "v0.1.0")
+
+                DropZoneView(files: $files)
+                    .frame(minWidth: 500, maxWidth: .infinity)
+                    .frame(height: 400)
+
+            }
+            .environment(\.theme, .default)
 
         }
         .windowResizability(.contentSize)
