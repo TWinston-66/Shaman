@@ -2,9 +2,6 @@
   <img src="images/icon_dark_0-3-0.png" alt="Shaman icon" width="128">
 </p>
 
-
-![](image.tiff)
-
 <h1 align="center">Shaman</h1>
 
 <p align="center">

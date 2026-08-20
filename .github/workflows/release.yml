@@ -50,7 +50,7 @@ jobs:
           ## Installation
 
           Download the latest `.zip` from [Releases](https://github.com/TWinston-66/Shaman/releases/latest),
-          unzip it, and move **Shaman.app** to `/Applications`.
+          unzip it, and move **Shaman.app** to \`/Applications\`.
           
           Release builds are ad-hoc signed but **not notarized**, so Gatekeeper blocks the first
           launch. 
