@@ -25,7 +25,7 @@ extension EnvironmentValues {
 
                 DropZoneView(files: $files)
             }
-            .frame(minHeight: 415)
+            .frame(minWidth: 880, minHeight: 430)
             .environment(\.theme, .default)
 
         }

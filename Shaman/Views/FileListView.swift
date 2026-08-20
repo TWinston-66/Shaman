@@ -11,6 +11,7 @@ struct FileListView: View {
 
     @Binding var files: [DroppedFile]
     @Binding var run: Bool
+    @Binding var jobCancel: Bool
 
     var body: some View {
         if files.isEmpty {
@@ -21,7 +22,10 @@ struct FileListView: View {
         } else {
             ScrollView {
                 ForEach($files) { $file in
-                    FileBubble(file: $file, run: $run)
+                    let id = file.id
+                    FileBubble(file: $file, run: $run, jobCancel: $jobCancel) {
+                        withAnimation { files.removeAll { $0.id == id } }
+                    }
                 }
 
             }

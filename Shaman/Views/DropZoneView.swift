@@ -1,5 +1,5 @@
 //
-//  LoadView 2.swift
+//  DropZoneView.swift
 //  Shaman
 //
 //  Created by winston on 8/18/26.
@@ -13,6 +13,7 @@ struct DropZoneView: View {
 
     @State private var isTargeted = false
     @State private var run = false
+    @State private var jobCancel = false
 
     @Binding var files: [DroppedFile]
 
@@ -33,17 +34,18 @@ struct DropZoneView: View {
 
         ZStack {
 
-            FileListView(files: $files, run: $run)
+            FileListView(files: $files, run: $run, jobCancel: $jobCancel)
                 .padding(run ? 5 : 16)
 
-            if !files.isEmpty && (!run || allFilesDone) {
+            if !files.isEmpty && (!run || allFilesDone || jobCancel) {
                 VStack {
                     Spacer()
 
-                    if allFilesDone {
+                    if allFilesDone || jobCancel {
                         Button(action: {
                             withAnimation {
                                 run = false
+                                jobCancel = false
                                 files = []
                             }
                         }, label: {

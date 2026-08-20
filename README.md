@@ -1,6 +1,9 @@
 <p align="center">
-  <img src="images/icon_dark_0-2-0.png" alt="Shaman icon" width="128">
+  <img src="images/icon_dark_0-3-0.png" alt="Shaman icon" width="128">
 </p>
+
+
+![](image.tiff)
 
 <h1 align="center">Shaman</h1>
 
@@ -19,7 +22,7 @@ mode, so single batch can mix generate and verify. Hashes are generated
 concurrently, then each file's digest and elapsed time are reported as they land.
 
 <p align="center">
-  <img src="images/file_list_0-2-0.png" width="700">
+  <img src="images/file_list_0-3-0.png" width="700">
 </p>
 
 The algorithms of pasted digests are inferred based on hash length. Pick a different 
@@ -27,25 +30,24 @@ one from the menu to override. Results show expected against actual, with a symb
 displaying match success.
 
 <p align="center">
-  <img src="images/results_0-2-0.png" width="900">
+  <img src="images/results_0-3-0.png" width="900">
 </p>
 
 ## Details
 
 - **Timing:** Each file times its own hash in seconds and milliseconds
-- **Insecure algorithms:** are marked with a warning symbol in the algorithm dropdown
+- **Insecure algorithms:** Not-to-be-used algorithms are marked with a warning symbol
 - **Duplicate drops are ignored:** Files are matched on path
-- **Rows are colored by outcome:** green when the digest lands, red on error
+- **Rows are colored by outcome:** Green when the digest lands, red on error
+- **Cancellable jobs:** Jobs can be canceled and batches can be aborted
 
 ## Supported algorithms
 
-| Algorithm | Digest  | Notes    |
-| --------- | ------  | ---------|
-| SHA-256   | 256-bit | Default  |
-| SHA-384   | 384-bit |          |
-| SHA-512   | 512-bit |          |
-| SHA-1     | 160-bit | Insecure |
-| MD5       | 128-bit | Insecure |
+- SHA-256 (default)
+- SHA-384
+- SHA-512
+- SHA-1 (insecure)
+- MD5 (insecure)
 
 ## Requirements
 
@@ -62,11 +64,9 @@ launch.
 
 Go to *System Settings → Privacy & Security → Open Anyway* to approve and launch a second time.
 
-### Shaman SHA-256 Checksum
+**Checksum**
 
-```
-580fb0b0ca52159974284a977c2763d8bece8f00558a0c2fbad71740a1de4442
-```
+`580fb0b0ca52159974284a977c2763d8bece8f00558a0c2fbad71740a1de4442`
 
 ## Building from source
 

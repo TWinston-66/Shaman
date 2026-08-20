@@ -11,13 +11,16 @@ struct BubbleResults: View {
     
     @Environment(\.theme) private var theme
     
+    @State private var copied: Bool = false
+    @State private var copyHovered: Bool = false
+    
     @Binding var file: DroppedFile
     @Binding var algorithm: HashAlgorithm
     @Binding var run: Bool
     @Binding var digest: String
     @Binding var digestHovered: Bool
-    @Binding var copied: Bool
-    @Binding var copyHovered: Bool
+   
+    
     var matches: Bool
     let cornerRadius: CGFloat
 
@@ -40,7 +43,7 @@ struct BubbleResults: View {
                         .font(.body.monospaced())
                         .foregroundStyle(theme.color.textMuted)
                         .lineLimit(1)
-                        .fixedSize()
+                        .truncationMode(.middle)
                 }
 
                 HStack {
@@ -56,7 +59,7 @@ struct BubbleResults: View {
                         .font(.body.monospaced())
                         .foregroundStyle(theme.color.textMuted)
                         .lineLimit(1)
-                        .fixedSize()
+                        .truncationMode(.middle)
 
                     Image(
                         systemName: copied
