@@ -66,7 +66,7 @@ Go to *System Settings → Privacy & Security → Open Anyway* to approve and la
 
 **Checksum**
 
-`580fb0b0ca52159974284a977c2763d8bece8f00558a0c2fbad71740a1de4442`
+`ad50bc584d8bcccb9853190f1d29f0a4e31febf8091be65912990eee6b8cfb45`
 
 ## Building from source
 
